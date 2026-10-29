@@ -1,0 +1,72 @@
+---
+layout: default
+title: Blog
+description: Notes, experiments, and lessons from building things.
+permalink: /blog/
+---
+<style>
+    .blog-card {
+        padding: 20px;
+        border: 1px solid rgb(190, 190, 190);
+        background-color: #f0f0f0;
+        margin: 10px;
+        transition: 0.1s ease-in-out;
+    }
+    .blog-card-meta {
+        color: rgb(96, 96, 96);
+    }
+</style>
+    <header class="blog-header">
+
+        <h1>
+            Thinking out loud.
+        </h1>
+
+        <p>
+            Notes from the process of learning, building amd breaking things.
+        </p>
+    </header>
+
+    <section style="width:100%;">
+
+        {% assign sorted_posts = site.posts | sort: "date" | reverse %}
+
+        {% for post in sorted_posts %}
+
+        <article class="blog-card">
+
+            <div class="blog-card-meta">
+                <time datetime="{{ post.date | date_to_xmlschema }}">
+                    {{ post.date | date: "%d %b %Y" }}
+                </time>
+
+                {% if post.category %}
+                <span>· {{ post.category }}</span>
+                {% endif %}
+            </div>
+
+            <h2>
+                <a href="{{ post.url | relative_url }}">
+                    {{ post.title }}
+                </a>
+            </h2>
+
+            <p>
+                {% if post.description %}
+                    {{ post.description }}
+                {% elsif post.excerpt %}
+                    {{ post.excerpt | strip_html | normalize_whitespace | truncate: 180 }}
+                {% endif %}
+            </p>
+
+        </article>
+
+        {% endfor %}
+
+        {% if site.posts.size == 0 %}
+        <div class="blog-empty">
+            <h2>No entries yet.</h2>
+        </div>
+        {% endif %}
+
+    </section>

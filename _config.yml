@@ -1,0 +1,7 @@
+title: Vismaya Atreya
+description: My engineering portfolio
+url: "https://vismodo.github.io"
+baseurl: ""
+
+markdown: kramdown
+permalink: /blog/:year/:month/:day/:title/

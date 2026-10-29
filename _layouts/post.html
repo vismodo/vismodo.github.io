@@ -1,0 +1,47 @@
+---
+layout: default
+---
+
+<style>
+    .article-back {
+        text-decoration: none;
+        color: rgb(0, 147, 0);
+    }
+</style>
+
+    {% assign categories = page.category | split: ", " %}
+    <header class="article-header">
+
+        <a class="article-back" href="{{ '/blog/' | relative_url }}">
+            ← Back
+        </a>
+        <h1>{{ page.title }}</h1>
+        <div class="article-meta">
+            <time datetime="{{ page.date | date_to_xmlschema }}">
+                {{ page.date | date: "%d %B %Y" }}
+            </time>
+        </div>
+        <div class="skillboxes" style="margin-bottom:-40px;">
+
+{% for category in categories %}
+    <span>{{ category }}</span>
+{% endfor %}</div>
+        {% if page.description %}
+        <p class="article-description">{{ page.description }}</p>
+        {% endif %}
+        <br>
+        <hr>
+        <br><br>
+    </header>
+
+    <div class="article-content">
+        {{ content }}
+    </div>
+
+    <footer class="article-footer">
+        <p>Thanks for reading!</p>
+
+        <a class="article-back" href="{{ '/blog/' | relative_url }}">
+            ← More
+        </a>
+    </footer>

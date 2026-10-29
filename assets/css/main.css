@@ -1,5 +1,7 @@
 * {
-    font-family: 'Andale Mono', monospace;
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 400;
+    font-style: normal;
 }
 
 html {
@@ -293,6 +295,7 @@ div.hero p {
     border: 1px solid rgb(190, 190, 190);
     background-color: #f0f0f0;
     margin: 10px;
+    transition: 0.1s ease-in-out;
 }
 
 .detail_link {
@@ -360,20 +363,24 @@ div.hero p {
     }
 }
 
+.section {
+    margin-bottom: 50px;
+}
+
 .section .title {
     color: #17692b;
     text-transform: uppercase;
 
 }
 
-.section .skillboxes {
+.skillboxes {
     width: 100%;
     padding-top: 20px;
     height: 100px;
     display: block;
 }
 
-.section .skillboxes span {
+.skillboxes span {
     height: 20px;
     background-color: #efefef;
     color: rgb(41, 41, 41);
@@ -385,3 +392,4 @@ div.hero p {
     float: left;
     margin-bottom: 10px;
 }
+

@@ -1,123 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link type="text/css" rel="stylesheet" href="main.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
-    <title>Vismaya Atreya</title>
-</head>
-
-<body>
-    <nav class="navbar">
-        <a href="" class="nav_element nav_main">Vismaya Atreya</a>
-        <a href="#about" class="nav_element">about</a>
-        <a href="projects/" class="nav_element">projects</a>
-        <a href="#interests" class="nav_element">interests</a>
-        <a href="" class="nav_element">contact</a>
-    </nav>
-    <div class="container">
-        <div class="hero">
-            <div class="text">
-                <h1><span style="color: rgb(0, 129, 0); font: inherit;">Engineer by</span> practice.</h1>
-                <p>Hi! I'm Vismaya Atreya — a Biomedical Engineering student at the Indian Institute of Technology, Hyderabad interested in the systems that connect code, circuits, machines, and the human body.</p>
-            </div>
-            <div class="hero-visual">
-            <div class="lcd-module">
+---
+layout: default
+title: Home
+---
+<div class="hero">
+    <div class="text">
+        <h1><span style="color: rgb(0, 129, 0); font: inherit;">Engineer by</span> practice.</h1>
+        <p>Hi! I'm Vismaya Atreya — a Biomedical Engineering student at the Indian Institute of Technology, Hyderabad
+            interested in the systems that connect code, circuits, machines, and the human body.</p>
+    </div>
+    <div class="hero-visual">
+        <div class="lcd-module">
             <div class="pcb">
-            <!-- Header pins -->
-            <div class="pin-row" aria-hidden="true">
-            <span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span>
-            </div>
+                <!-- Header pins -->
+                <div class="pin-row" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span>
+                </div>
 
-            <!-- Mounting holes -->
-            <span class="mount mount-tl"></span>
-            <span class="mount mount-tr"></span>
-            <span class="mount mount-bl"></span>
-            <span class="mount mount-br"></span>
+                <!-- Mounting holes -->
+                <span class="mount mount-tl"></span>
+                <span class="mount mount-tr"></span>
+                <span class="mount mount-bl"></span>
+                <span class="mount mount-br"></span>
 
-            <!-- LCD bezel -->
-            <div class="bezel">
-            <div class="bezel-groove groove-top"></div>
+                <!-- LCD bezel -->
+                <div class="bezel">
+                    <div class="bezel-groove groove-top"></div>
 
-            <!-- LCD display -->
-            <div class="lcd-screen">
-                <div
-                class="lcd-grid"
-                role="img"
-                aria-label="Hey, I'm Vismaya!"
-                >
-                <span>H</span>
-                <span>e</span>
-                <span>y</span>
-                <span>,</span>
-                <span></span>
-                <span>I</span>
-                <span>'</span>
-                <span>m</span>
-                <span></span>
-                <span>V</span>
-                <span>i</span>
-                <span>s</span>
-                <span>m</span>
-                <span>a</span>
-                <span>y</span>
-                <span>a</span>
-                <span>!</span>
+                    <!-- LCD display -->
+                    <div class="lcd-screen">
+                        <div class="lcd-grid" role="img" aria-label="Hey, I'm Vismaya!">
+                            <span>H</span>
+                            <span>e</span>
+                            <span>y</span>
+                            <span>,</span>
+                            <span></span>
+                            <span>I</span>
+                            <span>'</span>
+                            <span>m</span>
+                            <span></span>
+                            <span>V</span>
+                            <span>i</span>
+                            <span>s</span>
+                            <span>m</span>
+                            <span>a</span>
+                            <span>y</span>
+                            <span>a</span>
+                            <span>!</span>
+                        </div>
+                    </div>
+
+                    <div class="bezel-groove groove-bottom"></div>
                 </div>
             </div>
-
-            <div class="bezel-groove groove-bottom"></div>
-            </div>
-            </div>
-            </div></div>
         </div>
-        <div class="section">
-            <span class="title" id="about">About Me</span>
+    </div>
+</div>
+<div class="section">
+    <span class="title" id="about">About Me</span>
 
-            <h1>
-                Building for the physical world
-            </h1>
-            
-            <p>
-                I’m interested in engineering that moves beyond the screen and interacts with the real world. I study Biomedical Engineering at IIT Hyderabad, and I’m exploring embedded systems, computer vision and robotics.
-            </p>
-            <div class="skillboxes">
-                <span>Python</span>
-                <span>OpenCV</span>
-                <span>Robotics</span>
-                <span>Linux</span>
-            </div>
-        </div>
+    <h1>
+        Building for the physical world
+    </h1>
 
-        <div class="section">
-            <span class="title" id="projects">Featured Projects</span>
-            <h1>What I'm Tinkering With</h1>
-            <a href="/projects/" class="detail_link">View All Projects >>></a><br><br>
-            <div class="projects">
-                <div class="project">
-                    <span class="title">Perception</span>
-                    <h2>Road Navigation</h2>
-                    <p>Working through obstacle awareness, route planning, and perception that can support robust decisions.</p>
-                </div>
-                <div class="project">
-                    <span class="title">Control</span>
-                    <h2>Balancing on two wheels</h2>
-                    <p>Learning to balance a robot, using linear control systems like PID and LQR controllers built from the ground-up.</p>
-                </div>
-            </div>
-            <br>
-            <br>
-        </div>
-        <div class="section">
+    <p>
+        I’m interested in engineering that moves beyond the screen and interacts with the real world. I study Biomedical
+        Engineering at IIT Hyderabad, and I’m exploring embedded systems, computer vision and robotics.
+    </p>
+    <div class="skillboxes">
+        <span>Python</span>
+        <span>OpenCV</span>
+        <span>Robotics</span>
+        <span>Linux</span>
+    </div>
+</div>
+
+<div class="section">
     <span class="title" id="interests">Interests</span>
     <h1>Curious about how things work.</h1>
 
@@ -165,8 +127,23 @@
         </div>
     </div>
 </div>
+<div class="section">
+    <span class="title" id="projects">Featured Projects</span>
+    <h1>What I'm Tinkering With</h1>
+    <a href="{{ '/projects/' | relative_url }}" class="detail_link">View All Projects >>></a><br><br>
+    <div class="projects">
+        <div class="project">
+            <span class="title">Perception</span>
+            <h2>Road Navigation</h2>
+            <p>Working through obstacle awareness, route planning, and perception that can support robust decisions.</p>
+        </div>
+        <div class="project">
+            <span class="title">Control</span>
+            <h2>Balancing on two wheels</h2>
+            <p>Learning to balance a robot, using linear control systems like PID and LQR controllers built from the
+                ground-up.</p>
+        </div>
     </div>
-    
-</body>
-
-</html>
+    <br>
+    <br>
+</div>
