@@ -33,7 +33,130 @@
         text-decoration: none;
         color: rgb(0, 147, 0);
     }
+    img {
+        width: min(600px, 100%);
+        border-radius: 8px;
+        border: 1px solid grey;
+    }
+    .imgbox {
+        width: 100%;
+        text-align: center;
+    }
+    span.img_subtext {
+        color: rgb(55, 55, 55);
+        font-family: 'Courier New', Courier, monospace;
+        font-style: italic;
+    }
+/* Keep article content inside the available width */
+.article-content {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Jekyll / Rouge code block wrappers */
+.article-content .highlighter-rouge,
+.article-content .highlight,
+.article-content figure.highlight {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Code block appearance */
+.article-content .highlight {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #f3f3f3;
+    overflow: hidden;
+}
+
+/* The actual scrolling area */
+.article-content pre {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1rem 1.25rem;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: pre;
+    overflow-wrap: normal;
+    word-break: normal;
+
+    -webkit-overflow-scrolling: touch;
+
+    background: #f3f3f3;
+    color: #272727;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    tab-size: 4;
+}
+
+/* Keep code from expanding its container */
+.article-content pre code {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
+    white-space: pre;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+
+    .article-content pre {
+        padding: 0.75rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Inline code, e.g. `my_variable` */
+.article-content :not(pre) > code {
+    padding: 0.15em 0.4em;
+    border: 1px solid #d5d5d5;
+    border-radius: 4px;
+    background: #e8e8e8;
+    color: #17692b;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.88em;
+    overflow-wrap: anywhere;
+}
+
+/* Prevent inline-code styling from affecting code blocks */
+.article-content pre code {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+    overflow-wrap: normal;
+}
 </style>
+
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="/assets/css/syntax.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
     
     <header class="article-header">
@@ -63,53 +186,421 @@
     </header>
 
     <div class="article-content">
-        <p>Visual odometry is the process of estimating a camera’s movement by
-analysing the visual information captured across consecutive frames.</p>
+        <p>The perceptron is the most fundamental unit of a deep learning model and stacking perceptron layers gives you a multi-layer perceptron. Building one for an embedded system like the Arduino UNO helped me develop a deeper understanding of how it worked, since every element of it had to be reduced to simple code. I first evaluated the model by reading its serial logs and then representing each neuron with its own LED on a breadboard.</p>
+<h2 id="the-architecture">The Architecture</h2>
 
-<p>I started exploring this while experimenting with a phone camera and
-OpenCV. The basic idea sounds straightforward: detect visual features,
-match them between frames, and use those correspondences to estimate
-how the camera moved.</p>
+<div class="imgbox">
+<img alt="mlp.png" src="/assets/images/mlp.png" /><br />
+<span class="img_subtext">The MLP Architecure. Drawn with ChatGPT</span>
+</div>
+<p>I started with an input layer of three inputs, followed by a fully connected hidden layer having four neurons and finally a single output neuron. The activation function I used is sigmoid.</p>
 
-<p>In practice, things get more complicated.</p>
+<h2 id="initialization">Initialization</h2>
 
-<h2 id="the-problem-with-rotation">The problem with rotation</h2>
+<p>Number of training cases = N <br />
+Inputs = X (N x 3)<br />
+Unactivated Hidden Layer = Z<sub>1</sub> (N x 4)<br />
+Activated Hidden Layer = A<sub>1</sub> (N x 4)<br />
+Unactivated Output Layer = Z<sub>2</sub> (N x 1)<br />
+Activated Output Layer = A<sub>1</sub> (N x 1)<br />
+Expected Outputs = ŷ (N x 1)</p>
 
-<p>When a camera rotates, features can move substantially across the
-image even if the camera has barely translated through space.</p>
+<p>We denote the input to hidden layer weights and biases by W<sub>1</sub> and B<sub>1</sub> respectively.
+Similarly, the hidden to output layer weights and biases are W<sub>2</sub> and B<sub>2</sub> respectively.</p>
 
-<p>That means image motion isn’t necessarily the same thing as physical
-displacement.</p>
+<p>W<sub>1</sub> -&gt; 3 x 4 <br />
+B<sub>1</sub> -&gt; 1 x 4 <br />
+W<sub>2</sub> -&gt; 4 x 1 <br />
+B<sub>2</sub> -&gt; 1 x 1</p>
 
-<p>An algorithm that interprets every change in feature position as
-evidence of forward movement can produce unreliable estimates.</p>
+<p>We also need to randomize them.</p>
 
-<h2 id="why-feature-tracking-isnt-enough">Why feature tracking isn’t enough</h2>
+<p>We keep a learning rate of 0.5 and 3000 epochs (executes quite slowly on an Arduino UNO).</p>
 
-<p>Feature detection methods such as ORB can identify distinctive points
-in an image. Matching those points across frames gives us information
-about how the image changed.</p>
+<p>Implementation in code:</p>
 
-<p>But those matches alone don’t automatically tell us how the camera
-moved. The geometry of the camera, the scene, and the type of motion
-all matter.</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">int</span> <span class="n">numInputs</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">numHidden</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
 
-<h2 id="what-im-exploring-next">What I’m exploring next</h2>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">lr</span> <span class="o">=</span> <span class="mf">0.5f</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">epochs</span> <span class="o">=</span> <span class="mi">3000</span><span class="p">;</span>
 
-<p>Some approaches worth investigating include:</p>
+<span class="k">constexpr</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">z0</span><span class="p">[</span><span class="n">N</span><span class="p">][</span><span class="n">numInputs</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">}};</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">allInputs</span><span class="p">[</span><span class="mi">8</span><span class="p">][</span><span class="n">numInputs</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">}};</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">ycap</span><span class="p">[</span><span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">};</span>
 
-<ul>
-  <li>Selecting keyframes instead of processing every frame identically.</li>
-  <li>Estimating rotational motion separately from translation.</li>
-  <li>Improving feature matching and rejecting outliers.</li>
-  <li>Understanding how camera calibration affects motion estimation.</li>
-</ul>
+<span class="kt">float</span> <span class="n">w1</span><span class="p">[</span><span class="n">numInputs</span><span class="p">][</span><span class="n">numHidden</span><span class="p">];</span>
+<span class="kt">float</span> <span class="n">w2</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+<span class="kt">float</span> <span class="n">b1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+<span class="kt">float</span> <span class="n">b2</span><span class="p">;</span>
 
-<p>The goal isn’t just to make the visualisation look convincing. It’s
-to understand when the estimate is trustworthy and when it isn’t.</p>
+<span class="kt">float</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="kt">float</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="mf">1.0f</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0f</span> <span class="o">+</span> <span class="n">expf</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">));</span>
+<span class="p">}</span>
 
-<p>That’s the interesting part of building things: the gap between
-something that appears to work and something you actually understand.</p>
+<span class="kt">float</span> <span class="nf">sigmoid_deriv</span><span class="p">(</span><span class="kt">float</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0f</span> <span class="o">-</span> <span class="n">a</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">float</span> <span class="nf">randWeight</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">random</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1001</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1000.0f</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+  <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">Serial</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="n">randomSeed</span><span class="p">(</span><span class="n">analogRead</span><span class="p">(</span><span class="n">A0</span><span class="p">));</span>   <span class="c1">// leave A0 unconnected</span>
+  <span class="c1">// Assigning random weights and biases</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+      <span class="n">w1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">randWeight</span><span class="p">();</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">randWeight</span><span class="p">();</span>
+    <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">randWeight</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="n">b2</span> <span class="o">=</span> <span class="n">randWeight</span><span class="p">();</span>
+  <span class="p">.</span>
+  <span class="p">.</span>
+  <span class="p">.</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="forward-propagation">Forward Propagation</h2>
+
+<p>Z<sub>1</sub> = X W<sub>1</sub> + B<sub>1</sub><br />
+A<sub>1</sub> = 𝜎(Z<sub>1</sub>)</p>
+
+<p>Z<sub>2</sub> = A<sub>1</sub> W<sub>2</sub> + B<sub>2</sub><br />
+A<sub>2</sub> = 𝜎(Z<sub>2</sub>)</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Forward prop</span>
+    <span class="kt">float</span> <span class="n">a1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">float</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+            <span class="n">z1</span> <span class="o">+=</span> <span class="n">z0</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">w1</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+        <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kt">float</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">b2</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">+=</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+    <span class="kt">float</span> <span class="n">a2</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">);</span>
+    <span class="p">.</span>
+    <span class="p">.</span>
+    <span class="p">.</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>I use <code class="language-plaintext highlighter-rouge">float</code> instead of <code class="language-plaintext highlighter-rouge">double</code> to save memory.</p>
+
+<h2 id="backward-propagation">Backward Propagation</h2>
+
+<p>Now, we correct our weights and biases.</p>
+
+\[\delta_2 = (a_2-y_x)\sigma'(z_2)\]
+
+\[\delta_{1,j} = w_{2,j}\delta_2\sigma'(z_{1,j})\]
+
+\[w_{2,j} \leftarrow w_{2,j}-\eta\delta_2a_{1,j}\]
+
+\[b_2 \leftarrow b_2-\eta\delta_2\]
+
+\[w_{1,kj} \leftarrow w_{1,kj}-\eta\delta_{1,j}x_k\]
+
+\[b_{1,j} \leftarrow b_{1,j}-\eta\delta_{1,j}\]
+
+<p>In code:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">.</span>
+<span class="p">.</span>
+<span class="p">.</span>
+<span class="c1">// Backprop</span>
+<span class="kt">float</span> <span class="n">delta2</span> <span class="o">=</span> <span class="p">(</span><span class="n">a2</span> <span class="o">-</span> <span class="n">ycap</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="o">*</span> <span class="nf">sigmoid_deriv</span><span class="p">(</span><span class="n">a2</span><span class="p">);</span>
+
+<span class="kt">float</span> <span class="n">delta1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+    <span class="n">delta1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">delta2</span> <span class="o">*</span> <span class="nf">sigmoid_deriv</span><span class="p">(</span><span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+    <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-=</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">delta2</span> <span class="o">*</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+<span class="n">b2</span> <span class="o">-=</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">delta2</span><span class="p">;</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">w1</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-=</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">delta1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">z0</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">k</span><span class="p">];</span>
+    <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-=</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">delta1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+<span class="p">}</span>
+<span class="p">.</span>
+<span class="p">.</span>
+<span class="p">.</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="visualising-the-mlp-using-leds">Visualising the MLP using LEDs</h2>
+
+<p>I arranged the 8 LEDs on a breadboard with 220 ohm resistors. Here’s how I connected the LEDs to the Arduino UNO:</p>
+
+<div class="imgbox">
+<img alt="mlp.png" src="/assets/images/connections.jpeg" /><br />
+<span class="img_subtext">Sorry for the wire mess, the code below should make it easier to understand.</span>
+</div>
+
+<p>Then, I added the following lines to the beginning</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">int</span> <span class="n">inputLEDPins</span><span class="p">[</span><span class="n">numInputs</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="p">};</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">hiddenLEDPins</span><span class="p">[</span><span class="n">numHidden</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">9</span><span class="p">};</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">outputLEDPin</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">currentInput</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// This will make sense later</span>
+</code></pre></div></div>
+
+<p>We try to visualize the changes in activation during backprop as it happens</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">.</span>
+<span class="p">.</span>
+<span class="p">.</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">test</span> <span class="o">=</span> <span class="n">allInputs</span><span class="p">[</span><span class="n">currentInput</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="n">test</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="n">analogWrite</span><span class="p">(</span><span class="n">inputLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">output</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kt">float</span> <span class="n">a1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">float</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+            <span class="n">z1</span> <span class="o">+=</span> <span class="n">test</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">w1</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+        <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="n">analogWrite</span><span class="p">(</span><span class="n">hiddenLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">output</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kt">float</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">b2</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">+=</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+    <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">);</span>
+    <span class="n">analogWrite</span><span class="p">(</span><span class="n">outputLEDPin</span><span class="p">,</span> <span class="n">output</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="mi">300</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Serial logging</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"Epoch: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">epoch</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"  Loss: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+    <span class="n">currentInput</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">currentInput</span> <span class="o">=</span> <span class="n">currentInput</span> <span class="o">%</span> <span class="mi">8</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Once trained, we flash all the LEDs four times to indicate completion.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">.</span>
+<span class="p">.</span>
+<span class="p">.</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">255</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">2</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">analogWrite</span><span class="p">(</span><span class="n">inputLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">k</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">analogWrite</span><span class="p">(</span><span class="n">hiddenLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">k</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">analogWrite</span><span class="p">(</span><span class="n">outputLEDPin</span><span class="p">,</span> <span class="n">k</span><span class="p">);</span>
+    <span class="n">delay</span><span class="p">(</span><span class="mi">300</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Finally, we loop through each of the possible inputs indefinitely</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">test</span> <span class="o">=</span> <span class="n">allInputs</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="n">test</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="n">analogWrite</span><span class="p">(</span><span class="n">inputLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">output</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kt">float</span> <span class="n">a1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kt">float</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">z1</span> <span class="o">+=</span> <span class="n">test</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">w1</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+      <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">);</span>
+      <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="n">analogWrite</span><span class="p">(</span><span class="n">hiddenLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">output</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kt">float</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">b2</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+      <span class="n">z2</span> <span class="o">+=</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+    <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">);</span>
+    <span class="n">analogWrite</span><span class="p">(</span><span class="n">outputLEDPin</span><span class="p">,</span> <span class="n">output</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"Output: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">),</span> <span class="mi">6</span><span class="p">);</span>
+    <span class="n">delay</span><span class="p">(</span><span class="mi">1500</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="the-complete-code">The Complete Code</h2>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;math.h&gt;</span><span class="cp">
+</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">numInputs</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">numHidden</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="kt">float</span> <span class="n">lr</span> <span class="o">=</span> <span class="mf">0.5f</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">epochs</span> <span class="o">=</span> <span class="mi">3000</span><span class="p">;</span>
+
+<span class="k">constexpr</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">z0</span><span class="p">[</span><span class="n">N</span><span class="p">][</span><span class="n">numInputs</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">}};</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">allInputs</span><span class="p">[</span><span class="mi">8</span><span class="p">][</span><span class="n">numInputs</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">}};</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">ycap</span><span class="p">[</span><span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">};</span>
+
+<span class="kt">int</span> <span class="n">currentInput</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="kt">float</span> <span class="n">w1</span><span class="p">[</span><span class="n">numInputs</span><span class="p">][</span><span class="n">numHidden</span><span class="p">];</span>
+<span class="kt">float</span> <span class="n">w2</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+<span class="kt">float</span> <span class="n">b1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+<span class="kt">float</span> <span class="n">b2</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="kt">int</span> <span class="n">inputLEDPins</span><span class="p">[</span><span class="n">numInputs</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="p">};</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">hiddenLEDPins</span><span class="p">[</span><span class="n">numHidden</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">9</span><span class="p">};</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">outputLEDPin</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+
+<span class="kt">float</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="kt">float</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="mf">1.0f</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0f</span> <span class="o">+</span> <span class="n">expf</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kt">float</span> <span class="nf">sigmoid_deriv</span><span class="p">(</span><span class="kt">float</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0f</span> <span class="o">-</span> <span class="n">a</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// random float in [-1, 1]</span>
+<span class="kt">float</span> <span class="nf">randWeight</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">random</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1001</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1000.0f</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+  <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">Serial</span><span class="p">)</span> <span class="p">{}</span>            <span class="c1">// needed on some boards (Leonardo, etc.)</span>
+
+  <span class="n">randomSeed</span><span class="p">(</span><span class="n">analogRead</span><span class="p">(</span><span class="n">A0</span><span class="p">));</span>   <span class="c1">// leave A0 unconnected, or use a fixed number</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+      <span class="n">w1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">randWeight</span><span class="p">();</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">randWeight</span><span class="p">();</span>
+    <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">randWeight</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="n">b2</span> <span class="o">=</span> <span class="n">randWeight</span><span class="p">();</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">epoch</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">epoch</span> <span class="o">&lt;</span> <span class="n">epochs</span><span class="p">;</span> <span class="n">epoch</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">float</span> <span class="n">loss</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Forward prop</span>
+      <span class="kt">float</span> <span class="n">a1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">float</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+          <span class="n">z1</span> <span class="o">+=</span> <span class="n">z0</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">w1</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+        <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="kt">float</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">b2</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">+=</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="kt">float</span> <span class="n">a2</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">);</span>
+
+      <span class="n">loss</span> <span class="o">+=</span> <span class="mf">0.5f</span> <span class="o">*</span> <span class="p">(</span><span class="n">a2</span> <span class="o">-</span> <span class="n">ycap</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">a2</span> <span class="o">-</span> <span class="n">ycap</span><span class="p">[</span><span class="n">x</span><span class="p">]);</span>
+
+      <span class="c1">// Backprop</span>
+      <span class="kt">float</span> <span class="n">delta2</span> <span class="o">=</span> <span class="p">(</span><span class="n">a2</span> <span class="o">-</span> <span class="n">ycap</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="o">*</span> <span class="nf">sigmoid_deriv</span><span class="p">(</span><span class="n">a2</span><span class="p">);</span>
+
+      <span class="kt">float</span> <span class="n">delta1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">delta1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">delta2</span> <span class="o">*</span> <span class="nf">sigmoid_deriv</span><span class="p">(</span><span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
+
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-=</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">delta2</span> <span class="o">*</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="n">b2</span> <span class="o">-=</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">delta2</span><span class="p">;</span>
+
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+          <span class="n">w1</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-=</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">delta1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">z0</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">k</span><span class="p">];</span>
+        <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-=</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">delta1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kt">float</span><span class="o">*</span> <span class="n">test</span> <span class="o">=</span> <span class="n">allInputs</span><span class="p">[</span><span class="n">currentInput</span><span class="p">];</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="n">test</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="n">analogWrite</span><span class="p">(</span><span class="n">inputLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">output</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="kt">float</span> <span class="n">a1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">float</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+          <span class="n">z1</span> <span class="o">+=</span> <span class="n">test</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">w1</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+        <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="n">analogWrite</span><span class="p">(</span><span class="n">hiddenLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">output</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="kt">float</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">b2</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">+=</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">);</span>
+      <span class="n">analogWrite</span><span class="p">(</span><span class="n">outputLEDPin</span><span class="p">,</span> <span class="n">output</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="mi">300</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"Epoch: "</span><span class="p">);</span>
+      <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">epoch</span><span class="p">);</span>
+      <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"  Loss: "</span><span class="p">);</span>
+      <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+      <span class="n">currentInput</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+      <span class="n">currentInput</span> <span class="o">=</span> <span class="n">currentInput</span> <span class="o">%</span> <span class="mi">8</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">255</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">2</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">analogWrite</span><span class="p">(</span><span class="n">inputLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">k</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">analogWrite</span><span class="p">(</span><span class="n">hiddenLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">k</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">analogWrite</span><span class="p">(</span><span class="n">outputLEDPin</span><span class="p">,</span> <span class="n">k</span><span class="p">);</span>
+    <span class="n">delay</span><span class="p">(</span><span class="mi">300</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">float</span><span class="o">*</span> <span class="n">test</span> <span class="o">=</span> <span class="n">allInputs</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="n">test</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="n">analogWrite</span><span class="p">(</span><span class="n">inputLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">output</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kt">float</span> <span class="n">a1</span><span class="p">[</span><span class="n">numHidden</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kt">float</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">b1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">numInputs</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">z1</span> <span class="o">+=</span> <span class="n">test</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">w1</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+      <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">);</span>
+      <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="n">analogWrite</span><span class="p">(</span><span class="n">hiddenLEDPins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">output</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="kt">float</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">b2</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">numHidden</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+      <span class="n">z2</span> <span class="o">+=</span> <span class="n">a1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">w2</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+    <span class="kt">int</span> <span class="n">output</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">*</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">);</span>
+    <span class="n">analogWrite</span><span class="p">(</span><span class="n">outputLEDPin</span><span class="p">,</span> <span class="n">output</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"Output: "</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">),</span> <span class="mi">6</span><span class="p">);</span>
+    <span class="n">delay</span><span class="p">(</span><span class="mi">1500</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
     </div>
 

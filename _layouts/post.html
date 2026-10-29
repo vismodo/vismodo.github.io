@@ -7,7 +7,130 @@ layout: default
         text-decoration: none;
         color: rgb(0, 147, 0);
     }
+    img {
+        width: min(600px, 100%);
+        border-radius: 8px;
+        border: 1px solid grey;
+    }
+    .imgbox {
+        width: 100%;
+        text-align: center;
+    }
+    span.img_subtext {
+        color: rgb(55, 55, 55);
+        font-family: 'Courier New', Courier, monospace;
+        font-style: italic;
+    }
+/* Keep article content inside the available width */
+.article-content {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Jekyll / Rouge code block wrappers */
+.article-content .highlighter-rouge,
+.article-content .highlight,
+.article-content figure.highlight {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Code block appearance */
+.article-content .highlight {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #f3f3f3;
+    overflow: hidden;
+}
+
+/* The actual scrolling area */
+.article-content pre {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1rem 1.25rem;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: pre;
+    overflow-wrap: normal;
+    word-break: normal;
+
+    -webkit-overflow-scrolling: touch;
+
+    background: #f3f3f3;
+    color: #272727;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    tab-size: 4;
+}
+
+/* Keep code from expanding its container */
+.article-content pre code {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
+    white-space: pre;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+
+    .article-content pre {
+        padding: 0.75rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Inline code, e.g. `my_variable` */
+.article-content :not(pre) > code {
+    padding: 0.15em 0.4em;
+    border: 1px solid #d5d5d5;
+    border-radius: 4px;
+    background: #e8e8e8;
+    color: #17692b;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.88em;
+    overflow-wrap: anywhere;
+}
+
+/* Prevent inline-code styling from affecting code blocks */
+.article-content pre code {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+    overflow-wrap: normal;
+}
 </style>
+
+<link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/syntax.css' | relative_url }}">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
     {% assign categories = page.category | split: ", " %}
     <header class="article-header">
