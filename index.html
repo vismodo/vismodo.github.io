@@ -147,3 +147,55 @@ title: Home
     <br>
     <br>
 </div>
+
+<div class="section">
+    <span class="title" id="contact">contact me</span><br><br>
+    <style>
+            .contact-links {
+                width: calc(100% - 42px);
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+                box-sizing: border-box;
+                margin-inline: auto;
+                padding: 20px;
+                text-align: center;
+                align-items: center;
+            }
+
+            .contact_link {
+                color: #17692b;
+                text-transform: uppercase;
+                text-decoration: none;
+                font-size: 0.95rem;
+                overflow-wrap: anywhere;
+                transition: color 0.2s ease;
+            }
+
+            .contact_link:hover {
+                color: #008100;
+                text-decoration: underline;
+                text-underline-offset: 4px;
+            }
+
+            /* Mobile layout */
+            @media (max-width: 600px) {
+                .contact-links {
+                    grid-template-columns: 1fr;
+                    gap: 0;
+                    padding: 8px 16px;
+                }
+
+                .contact_link {
+                    display: block;
+                    padding: 14px 8px;
+                    font-size: 1rem;
+                }
+            }
+        </style>
+    <div class="project contact-links">
+        <a href="mailto:vismaya.atreya@gmail.com" class="contact_link">Email</a>
+        <a href="https://github.com/vismodo" target="_blank" rel="noopener noreferrer" class="contact_link">GitHub</a>
+        <a href="https://www.linkedin.com/in/vismaya-atreya-29599a2a7/" target="_blank" rel="noopener noreferrer" class="contact_link">LinkedIn</a>
+    </div>
+</div>
